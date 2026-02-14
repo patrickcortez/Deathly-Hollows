@@ -1,0 +1,154 @@
+#ifndef GAME_HPP
+#define GAME_HPP
+
+//standard headers
+#include <string>
+#include <iostream>
+#include <sstream>
+
+//my headers
+#include "player.hpp"
+#include "items.hpp"
+#include "rooms.hpp"
+#include "inventory.hpp"
+
+//for easy access
+using std::cout;
+using std::string;
+
+//main game class
+class Game{
+    private:
+        Player* main; //player init
+        bool isRUnning = true; //running by default
+        tile* current = nullptr;
+        Map* world = new Map;
+
+        void init(){
+            string name,desc;
+            cout << "\033[93m" << "\t\t[Deathly Hollow]\n";
+            cout << "\n Whats your name? "; std::getline(std::cin,name); //get username
+            cout << "\n Alittle background? ";std::getline(std::cin,desc);
+
+            main = new Player(name,desc,100); //initialize player
+        }
+
+        void printHelp(){ //for user convenience
+            cout << "\n" << "Actions: \n";
+            cout << "\n" << "test - test action\n";
+            cout << "leave - exit the game\n";
+        }
+
+        void InitRooms(){ //initialize room before game begins
+            tile* kitchen = new tile("kitchen","A lovely simple kitchen");
+            tile* lr = new tile("Living Room","A simple living room w/ a tv, couch and a window");
+            tile* br = new tile("Bathroom","A simple bathroom w/ a toilet and a shower");
+            lr->coords = {2,2}; //starting coord
+            //join rooms
+            lr->CreateTile(kitchen,br);
+            br->CreateTile(lr,nullptr);
+            kitchen->CreateTile(nullptr,lr);
+
+            this->current = lr; //set living room as the current
+
+            world->fillMap(lr); //fill map to display
+
+        }
+
+        void displayMap(std::pair<int,int>& coords){
+            bool isDone = false;
+            std::pair<int,int> MapSize = world->getMapSize(); //get Map Size
+
+            cout << "--------------------------------------------\n";
+            for(int posY = 0;posY < MapSize.second; posY++){
+                for(int posX = 0;posX < MapSize.first;posX++){
+                    if(world->tiles[posX][posY] != nullptr){
+                        cout << " "; // if populated we display as space.
+                    }else if(posX == coords.first && posY == coords.second){
+                        cout << "O"; //display player position
+                    }else{
+                        cout << "#"; //display null elements as #  to simulate walls or borders
+                    }
+                }
+                cout << "\n"; //new line after a row is done
+            }
+        }
+
+        void traverse(const string& location){
+
+            //traverse to loc if not null
+            if(location == current->North->name && current->North !=  nullptr){
+                current = current->North;
+            }else if(location == current->South->name && current->South !=  nullptr){
+                current = current->South;
+            }else if(location == current->East->name && current->East != nullptr){
+                current = current->East;
+            }else if(location == current->West->name && current->West != nullptr){
+                current = current->West;
+            }
+
+        }
+
+        void displayTiles(){ //display adjacent tiles to player
+
+            cout << "Nearby Tiles:\n";
+
+            if(current->North != nullptr){
+                cout << current->North->name << " | " << current->North->desc << "\n";
+            }
+
+            if(current->South != nullptr){
+                cout << current->South->name << " | " << current->South->desc << "\n";
+            }
+
+            if(current->East != nullptr){
+                cout << current->East->name << " | " << current->East->desc << "\n";
+            }
+
+            if(current->West != nullptr){
+                cout << current->West->name << " | " << current->West->desc << "\n";
+            }
+
+            cout << "\n";
+        }
+
+    public:
+
+
+        void Main(){
+            init(); //initiate start of game
+            InitRooms(); //initiate rooms
+            string action; //Player action 
+
+
+            while(isRUnning){ //main game loop
+
+                displayTiles(); //display adjacent tiles so players knows where to travert next
+                std::pair<int,int> curPos = current->coords;
+                std::cout << "\033[93m" << main->getname() <<  "@" << current->name << ">: "; //prompt
+                std::getline(std::cin,action); //player action
+                std::stringstream ss(action); //init tokenizer
+
+                if(action.compare("test")==0){
+                    std::cout << "Hello From mars, your code is working!\n";
+                }else if(action.compare("help")==0){ //for user convenience
+                    printHelp();
+                }else if(action.compare("leave")==0){
+                    exit(0); //exit on quit
+                }else if(action.compare("display")==0){
+                    displayMap(curPos);
+                }else if(action.compare("move")==0){
+                    string location;
+                    ss >> location;
+
+                    traverse(location); //makeplayers traverse
+                }else if(action.compare("where")==0){
+                    cout << curPos.first << curPos.second << "\n";
+                }
+                cout << "\n";
+            }
+        }
+
+};
+
+#endif
