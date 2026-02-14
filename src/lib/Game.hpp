@@ -37,6 +37,9 @@ class Game{
             cout << "\n" << "Actions: \n";
             cout << "\n" << "test - test action\n";
             cout << "leave - exit the game\n";
+            cout << "move <location> - move to the desired location\n";
+            cout << "display - show the map\n";
+            cout << "where - show current coordinates\n";
         }
 
         void InitRooms(){ //initialize room before game begins
@@ -62,7 +65,7 @@ class Game{
             cout << "--------------------------------------------\n";
             for(int posY = 0;posY < MapSize.second; posY++){
                 for(int posX = 0;posX < MapSize.first;posX++){
-                    if(world->tiles[posX][posY] != nullptr){
+                    if(world->tiles[posX][posY] != nullptr && (posX != coords.first || posY != coords.second)){
                         cout << " "; // if populated we display as space.
                     }else if(posX == coords.first && posY == coords.second){
                         cout << "O"; //display player position
@@ -75,7 +78,6 @@ class Game{
         }
 
         void traverse(const string& location){
-
             //traverse to loc if not null
             if(location == current->North->name && current->North !=  nullptr){
                 current = current->North;
@@ -85,6 +87,8 @@ class Game{
                 current = current->East;
             }else if(location == current->West->name && current->West != nullptr){
                 current = current->West;
+            }else{
+                cout << "\033[91m" << location << " does not exist!\n";
             }
 
         }
@@ -128,22 +132,24 @@ class Game{
                 std::cout << "\033[93m" << main->getname() <<  "@" << current->name << ">: "; //prompt
                 std::getline(std::cin,action); //player action
                 std::stringstream ss(action); //init tokenizer
-
-                if(action.compare("test")==0){
+                string cmd;
+                ss >> cmd;
+                
+                if(cmd.compare("test")==0){
                     std::cout << "Hello From mars, your code is working!\n";
-                }else if(action.compare("help")==0){ //for user convenience
+                }else if(cmd.compare("help")==0){ //for user convenience
                     printHelp();
-                }else if(action.compare("leave")==0){
+                }else if(cmd.compare("leave")==0){
                     exit(0); //exit on quit
-                }else if(action.compare("display")==0){
+                }else if(cmd.compare("display")==0){
                     displayMap(curPos);
-                }else if(action.compare("move")==0){
+                }else if(cmd.compare("move")==0){
                     string location;
                     ss >> location;
 
-                    traverse(location); //makeplayers traverse
-                }else if(action.compare("where")==0){
-                    cout << curPos.first << curPos.second << "\n";
+                    traverse(location); //make players traverse
+                }else if(cmd.compare("where")==0){
+                    cout << curPos.first << "," << curPos.second << "\n"; //display curr pos to player
                 }
                 cout << "\n";
             }
