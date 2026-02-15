@@ -6,6 +6,10 @@
 #include <vector>
 #include <utility>
 
+//my headers
+#include "items.hpp"
+#include "inventory.hpp"
+
 //map size, 64x64 by default
 enum MapSize{
     X=64,
@@ -14,6 +18,7 @@ enum MapSize{
 
 struct tile{
     std::string name,desc; //name and desc of tile
+    std::vector<item> loot;
     //directions to nav
     tile* North;
     tile* South;
@@ -58,6 +63,50 @@ struct tile{
             W->coords = this->coords;
             W->coords.first += 1;
             this->West = W;
+        }
+    }
+
+    void addLoot(const item& xloot){ //add items to tile for player to pick up
+        this->loot.push_back(xloot);
+    }
+
+    void remLoot(const item& xloot){ //remove tile once the player picks up the item
+
+        for(auto& x: loot){
+            if(x == xloot && x.amt > 0){
+                x.amt -= 1;
+
+                if(x.amt == 0){
+                    this->loot.erase(find(loot.begin(),loot.end(),xloot));
+                    return;
+                }
+                return;
+            }
+        }
+    }
+
+    void giveLoot(inventory& bag,std::string& xloot){
+        bool found = false;
+        for(auto& x: loot){
+            if(x.name == xloot && x.amt > 0){
+                found = true;
+                if( bag.addItem(x)){
+                    remLoot(x);
+                    return;
+                }
+            }            
+        }
+
+            if(found == false){
+                std::cout << xloot << " Doesnt Exist!\n";
+            }
+    }
+    
+
+    void displayLoot(){ //display loot in current tile
+        std::cout << "Items around the room: \n";
+        for(const auto& x:loot){
+            std::cout << x.name << "|" << x.amt << "\n";
         }
     }
 };

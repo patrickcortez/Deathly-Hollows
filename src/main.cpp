@@ -1,4 +1,3 @@
-#include <iostream>
 #include "lib/Game.hpp"
 
 int main(){

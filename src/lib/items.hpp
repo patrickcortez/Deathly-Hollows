@@ -11,8 +11,8 @@ struct item{
     string name,desc; //name and description of an item
     int amt; //item amount
 
-    bool isKey = false,isObj = false,isConsumable = false; //identifier on what type of item, if key type, interactible object or consumable
-    item(string& x,string& y) : name(x),desc(y){} //initialize item
+    bool isKey,isObj,isConsumable; //identifier on what type of item, if key type, interactible object or consumable
+    item(const string& x = "",const string& y = "",const bool& isKey = false,const bool& isObj = false,const bool& isCons = false,const int& amt = 1) : name(x),desc(y),isKey(isKey),isObj(isObj),isConsumable(isCons),amt(amt){} //initialize item
 
     //define conditional operators for item =D
     bool operator==(const item& other) const{ //equal to opeerator

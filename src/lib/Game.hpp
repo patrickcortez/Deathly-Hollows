@@ -26,11 +26,13 @@ class Game{
 
         void init(){
             string name,desc;
+            item* none = new item("none","none");
             cout << "\033[93m" << "\t\t[Deathly Hollow]\n";
             cout << "\n Whats your name? "; std::getline(std::cin,name); //get username
             cout << "\n Alittle background? ";std::getline(std::cin,desc);
 
             main = new Player(name,desc,100); //initialize player
+            main->current = none;
         }
 
         void printHelp(){ //for user convenience
@@ -40,14 +42,24 @@ class Game{
             cout << "move <location> - move to the desired location\n";
             cout << "display - show the map\n";
             cout << "where - show current coordinates\n";
+            cout << "look - show items in the room\n";
+            cout << "take - take an item in room\n";
+            cout << "use <item> - equip an item\n";
         }
 
         void InitRooms(){ //initialize room before game begins
             tile* kitchen = new tile("kitchen","A lovely simple kitchen");
             tile* lr = new tile("Living Room","A simple living room w/ a tv, couch and a window");
             tile* br = new tile("Bathroom","A simple bathroom w/ a toilet and a shower");
+            
             lr->coords = {2,2}; //starting coord
-            //join rooms
+
+            //loot setup
+
+            item apple("Apple","A red delicious Apple",false,false,false,3);
+            lr->addLoot(apple);
+
+            //join tiles
             lr->CreateTile(kitchen,br);
             br->CreateTile(lr,nullptr);
             kitchen->CreateTile(nullptr,lr);
@@ -78,17 +90,18 @@ class Game{
         }
 
         void traverse(const string& location){
-            //traverse to loc if not null
-            if(location == current->North->name && current->North !=  nullptr){
+            //traverse to loc if not nullf
+            if(current->North != nullptr && location == current->North->name){
                 current = current->North;
-            }else if(location == current->South->name && current->South !=  nullptr){
+            }else if(current->South != nullptr && location == current->South->name){
                 current = current->South;
-            }else if(location == current->East->name && current->East != nullptr){
+            }else if(current->East != nullptr && location == current->East->name){
                 current = current->East;
-            }else if(location == current->West->name && current->West != nullptr){
+            }else if(current->West != nullptr && location == current->West->name){
                 current = current->West;
             }else{
                 cout << "\033[91m" << location << " does not exist!\n";
+                return;
             }
 
         }
@@ -116,6 +129,8 @@ class Game{
             cout << "\n";
         }
 
+
+
     public:
 
 
@@ -126,9 +141,9 @@ class Game{
 
 
             while(isRUnning){ //main game loop
-
                 displayTiles(); //display adjacent tiles so players knows where to travert next
                 std::pair<int,int> curPos = current->coords;
+                std::cout << "Item Equipped: " << main->current->name << "\n"; //display current item of player 
                 std::cout << "\033[93m" << main->getname() <<  "@" << current->name << ">: "; //prompt
                 std::getline(std::cin,action); //player action
                 std::stringstream ss(action); //init tokenizer
@@ -150,6 +165,18 @@ class Game{
                     traverse(location); //make players traverse
                 }else if(cmd.compare("where")==0){
                     cout << curPos.first << "," << curPos.second << "\n"; //display curr pos to player
+                }else if(cmd.compare("inventory")==0){ //display inventory of player
+                    main->main.displayItems(); 
+                }else if(cmd.compare("look")==0){
+                    current->displayLoot();
+                }else if(cmd.compare("take")==0){
+                    string thing;
+                    ss >> thing;
+                    current->giveLoot(main->main,thing);
+                }else if(cmd.compare("use")==0){
+                    string thing;
+                    ss >> thing;
+                    main->current = main->main.useItem(thing);
                 }
                 cout << "\n";
             }
