@@ -15,9 +15,11 @@ struct item{
     item(const string& x = "",const string& y = "",const bool& isKey = false,const bool& isObj = false,const bool& isCons = false,const int& amt = 1) : name(x),desc(y),isKey(isKey),isObj(isObj),isConsumable(isCons),amt(amt){} //initialize item
 
     //define conditional operators for item =D
-    bool operator==(const item& other) const{ //equal to opeerator
-        return name == other.name && amt == other.amt;
+    bool operator==(const item& other) const{ //equal to operator
+        return name == other.name; //we only compare names for easyness
     }
+
+    //then the rest is the amount
 
     bool operator<(const item& other) const{ //lesser 
         return amt < other.amt;

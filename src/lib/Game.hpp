@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <string>
 
 //my headers
 #include "player.hpp"
@@ -129,6 +131,16 @@ class Game{
             cout << "\n";
         }
 
+        string remchar(string& origin,const char& target){
+            for(int x = 0; x < origin.size();x++){
+                if(origin[x] == target){
+                    origin.erase(x,1);
+                    return origin;
+                    break;
+                }
+            }
+        }
+
 
 
     public:
@@ -160,7 +172,8 @@ class Game{
                     displayMap(curPos);
                 }else if(cmd.compare("move")==0){
                     string location;
-                    ss >> location;
+                    std::getline(ss,location);
+                    location = remchar(location,' '); 
 
                     traverse(location); //make players traverse
                 }else if(cmd.compare("where")==0){
@@ -172,11 +185,16 @@ class Game{
                 }else if(cmd.compare("take")==0){
                     string thing;
                     ss >> thing;
-                    current->giveLoot(main->main,thing);
+                    current->giveLoot(main->main,thing,1);
                 }else if(cmd.compare("use")==0){
                     string thing;
                     ss >> thing;
-                    main->current = main->main.useItem(thing);
+                    cout << thing << "\n"; //debug
+                    main->current = main->main.useItem(thing); 
+                }else if(cmd.compare("shout")==0){
+                    string sentence;
+                    std::getline(ss,sentence);
+                    std::cout << sentence << "\n";
                 }
                 cout << "\n";
             }

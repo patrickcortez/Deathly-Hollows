@@ -16,9 +16,18 @@ struct inventory{ //self explenatory like sybau bro -_-
 
 
         bool addItem(item& thing){
-            if(this->bag.size() < limit){ //if not full then store
-                this->bag.push_back(thing);
-                return true; //report success
+            if(this->bag.size() < limit || isPresent(bag.begin(),bag.end(),thing)==true){ //if not full then store
+
+                for(auto& x: bag){ //check if thing already exists in bag
+                
+                    if(x == thing){
+                        x.amt++; //only increment if the item already exists
+                        return true; //report success
+                    }
+                }
+
+                this->bag.push_back(thing); 
+                return true;
             }else{ //if player inven is at full size then we warn and dont store
                 std::cout << "\033[92m" << "Your bag is at full capacity\n";
                 return false; //report failure
@@ -27,10 +36,11 @@ struct inventory{ //self explenatory like sybau bro -_-
 
         item* useItem( const string& target){ //to set the current item of the plager
             bool found = false;
-            for(item x: bag){ //for each until we find the desired item by name
-                if(target == x.name){
+            for(item& x: this->bag){ //for each until we find the desired item by name
+                if(target == x.name && &x != nullptr){
                     found = true;
-                    return &x; //if found we return 
+                    std::cout << "Item: " << x.name << "\n";
+                    return& x; //if found we return 
                     break;
                 }
             }

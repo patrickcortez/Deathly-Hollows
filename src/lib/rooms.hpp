@@ -66,7 +66,7 @@ struct tile{
         }
     }
 
-    void addLoot(const item& xloot){ //add items to tile for player to pick up
+    void addLoot(item& xloot){ //add items to tile for player to pick up
         this->loot.push_back(xloot);
     }
 
@@ -74,9 +74,9 @@ struct tile{
 
         for(auto& x: loot){
             if(x == xloot && x.amt > 0){
-                x.amt -= 1;
+                x.amt -= 1; //remove 1 amount from the given item
 
-                if(x.amt == 0){
+                if(x.amt == 0){ //if amount is 0 then we remove the item from the vector
                     this->loot.erase(find(loot.begin(),loot.end(),xloot));
                     return;
                 }
@@ -85,12 +85,20 @@ struct tile{
         }
     }
 
-    void giveLoot(inventory& bag,std::string& xloot){
+    void giveLoot(inventory& bag,std::string& xloot,const int& amt){
         bool found = false;
         for(auto& x: loot){
             if(x.name == xloot && x.amt > 0){
+
+                if(amt > x.amt){
+                    std::cout << "You can't have that much";
+                    return;
+                }
+
                 found = true;
-                if( bag.addItem(x)){
+                item newOne = x; //create new instance to store the fkin
+                newOne.amt = amt;
+                if( bag.addItem(newOne)){
                     remLoot(x);
                     return;
                 }
