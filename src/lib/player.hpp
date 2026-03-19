@@ -3,13 +3,14 @@
 
 #include <string>
 #include <iostream>
-#include <memory>
+#include <utility>
+//#include <memory>
 
 #include "items.hpp"
 #include "inventory.hpp"
 
 using std::string;
-using std::make_unique;
+//using std::make_unique; //unused, might use later -_- idk
 
 class Player{
 
@@ -21,6 +22,7 @@ public:
 
 inventory main;
 item* current = nullptr;
+std::pair<int,int> coords;
 
 Player(string& x,string& y,int z) : name(x),desc(y),hp(z){} //initialize player
 
@@ -36,6 +38,10 @@ string getdesc(){
 
 int getHP(){
     return this->hp;
+}
+
+void setCoords(const std::pair<int,int> pcoords){
+    this->coords = pcoords;   
 }
 };
 

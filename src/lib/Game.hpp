@@ -18,6 +18,13 @@
 using std::cout;
 using std::string;
 
+enum Display{ //display size in map 5x5
+    X1 = 5,
+    Y1 = 5
+};
+
+const std::pair <int,int> start = {2,2};
+
 //main game class
 class Game{
     private:
@@ -25,6 +32,7 @@ class Game{
         bool isRUnning = true; //running by default
         tile* current = nullptr;
         Map* world = new Map;
+        
 
         void init(){
             string name,desc;
@@ -54,7 +62,7 @@ class Game{
             tile* lr = new tile("Living Room","A simple living room w/ a tv, couch and a window");
             tile* br = new tile("Bathroom","A simple bathroom w/ a toilet and a shower");
             
-            lr->coords = {2,2}; //starting coord
+            lr->coords = start; //starting coord
 
             //loot setup
 
@@ -72,13 +80,16 @@ class Game{
 
         }
 
-        void displayMap(std::pair<int,int>& coords){
+        void displayMap(std::pair<int,int>& coords,const int& Xaxis = 0,const int& Yaxis = MapSize::Y){ //for now we only have players coords as the
             bool isDone = false;
             std::pair<int,int> MapSize = world->getMapSize(); //get Map Size
 
             cout << "--------------------------------------------\n";
-            for(int posY = 0;posY < MapSize.second; posY++){
-                for(int posX = 0;posX < MapSize.first;posX++){
+            for(int posY = main->coords.second - 2;posY < Yaxis; posY++){
+                for(int posX = main->coords.first - 2;posX < Xaxis;posX++){
+
+                 //   std::cout << "PosX: " << posX << " PosY: " << posY << " "; //debug the map display for future bugs and shi
+
                     if(world->tiles[posX][posY] != nullptr && (posX != coords.first || posY != coords.second)){
                         cout << " "; // if populated we display as space.
                     }else if(posX == coords.first && posY == coords.second){
@@ -89,6 +100,7 @@ class Game{
                 }
                 cout << "\n"; //new line after a row is done
             }
+            std::cout << std::endl;
         }
 
         void traverse(const string& location){
@@ -154,7 +166,7 @@ class Game{
 
             while(isRUnning){ //main game loop
                 displayTiles(); //display adjacent tiles so players knows where to travert next
-                std::pair<int,int> curPos = current->coords;
+                main->coords = current->coords;
                 std::cout << "Item Equipped: " << main->current->name << "\n"; //display current item of player 
                 std::cout << "\033[93m" << main->getname() <<  "@" << current->name << ">: "; //prompt
                 std::getline(std::cin,action); //player action
@@ -169,7 +181,7 @@ class Game{
                 }else if(cmd.compare("leave")==0){
                     exit(0); //exit on quit
                 }else if(cmd.compare("display")==0){
-                    displayMap(curPos);
+                    displayMap(main->coords,Display::X1,Display::Y1);
                 }else if(cmd.compare("move")==0){
                     string location;
                     std::getline(ss,location);
@@ -177,7 +189,7 @@ class Game{
 
                     traverse(location); //make players traverse
                 }else if(cmd.compare("where")==0){
-                    cout << curPos.first << "," << curPos.second << "\n"; //display curr pos to player
+                    cout << main->coords.first << "," << main->coords.second << "\n"; //display curr pos to player
                 }else if(cmd.compare("inventory")==0){ //display inventory of player
                     main->main.displayItems(); 
                 }else if(cmd.compare("look")==0){
@@ -195,6 +207,8 @@ class Game{
                     string sentence;
                     std::getline(ss,sentence);
                     std::cout << sentence << "\n";
+                }else{
+                    std::cerr << "\033[91mGame: " << cmd << " is not an Action\n";
                 }
                 cout << "\n";
             }

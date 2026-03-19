@@ -1,4 +1,5 @@
 # Check if gcc is available if not then install
+# linux script, for linux
 
 which g++ ||{
     if sudo apt install gcc; then

@@ -19,6 +19,7 @@ enum MapSize{
 struct tile{
     std::string name,desc; //name and desc of tile
     std::vector<item> loot;
+    //char dir; //maybe in the future
     //directions to nav
     tile* North;
     tile* South;
