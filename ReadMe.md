@@ -14,10 +14,9 @@ A text adventure game where A man tries to escape from a cult.
 
 ## Compile:
 
-```bash
-
-g++ -I/lib src/main.cpp -o bin/Desp
-
+```powershell
+# execute the script to compile the game
+./check.bat
 ```
 
 ## Run
@@ -25,6 +24,10 @@ g++ -I/lib src/main.cpp -o bin/Desp
 ```bash
 
 cd bin && ./Desp
+
+# or
+
+./bin/Desp
 
 ```
 
