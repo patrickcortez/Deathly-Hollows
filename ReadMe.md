@@ -2,6 +2,8 @@
 
 A text adventure game where A man tries to escape from a cult.
 
+**Status**: W.I.P
+
 ## Set up
 
 1. You must have `gcc` to compile the game. If not install it at **MSYS2** then add the compiler to `path`.
@@ -16,8 +18,15 @@ if you're on windows just run `check.bat`
 ## Compile:
 
 ```powershell
-# execute the script to compile the game
+# execute the script to compile the game on windows
 ./check.bat
+```
+
+If you're on Linux:
+
+```bash
+# execute script to compile
+./check.sh
 ```
 
 ## Run
