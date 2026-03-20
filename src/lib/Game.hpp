@@ -257,8 +257,8 @@ class Game{
 
 
             while(isRUnning){ //main game loop
-                DrawUI(); //start rendering our UI.
                 clearscreen(); //clear screen so its clean
+                DrawUI(); //start rendering our UI.
                 displayTiles(); //display adjacent tiles so players knows where to travert next
                 main->coords = current->coords;
                 print("Item Equipped: " + main->current->name + "\n"); //display current item of player 
