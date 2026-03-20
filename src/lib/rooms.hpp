@@ -5,10 +5,12 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <windows.h>
 
 //my headers
 #include "items.hpp"
 #include "inventory.hpp"
+#include "Cstream.hpp"
 
 //map size, 64x64 by default
 enum MapSize{
@@ -112,10 +114,10 @@ struct tile{
     }
     
 
-    void displayLoot(){ //display loot in current tile
+    void displayLoot(HANDLE scbuff){ //display loot in current tile
         std::cout << "Items around the room: \n";
         for(const auto& x:loot){
-            std::cout << x.name << "|" << x.amt << "\n";
+            CS::outp(scbuff,x.name + "|" + std::to_string(x.amt) + "\n");  //std::cout << x.name << "|" << x.amt << "\n";
         }
     }
 };

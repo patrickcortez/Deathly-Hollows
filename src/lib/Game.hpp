@@ -6,7 +6,9 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <Windows.h>
 #include <string>
+#include <conio.h>
 
 //my headers
 #include "player.hpp"
@@ -15,7 +17,6 @@
 #include "inventory.hpp"
 
 //for easy access
-using std::cout;
 using std::string;
 
 enum Display{ //display size in map 5x5
@@ -32,29 +33,84 @@ class Game{
         bool isRUnning = true; //running by default
         tile* current = nullptr;
         Map* world = new Map;
+        HANDLE scrbuff; //declare a screen buffer to pass the buffer from main
+        int scrsizeW,scrsizeH;
+
+        void DrawUI(){
+            COORD hc = {0,0}; //set headers coords to top left
+            COORD fc = {0,(short)scrsizeH - 1}; //set the footer coords to the screens height -1 since its a coord
+            DWORD cbuff; //declare our buffer for header and fooder
+            WORD bg = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY; //set the background of header and footer to white
+
+            std::string title = "-Deathly Hollows-",ftitle = "A Game made by Patrick Andrew Cortez";
+            
+            if(scrsizeW > title.size()){
+                title.append(scrsizeW - title.size(),' ');
+            }
+
+            //finally we render our header
+
+            WriteConsoleOutputCharacterA( //write the header text to screen buffer
+                scrbuff,
+                title.c_str(),
+                title.size(),
+                hc,
+                &cbuff
+            );
+
+            FillConsoleOutputAttribute( //we then fill the headers background with white that we set in fg
+                scrbuff,
+                bg,
+                scrsizeW,
+                hc,
+                &cbuff
+            );
+
+            WORD fg = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY; //set footer background to white
+            DWORD cbuff2; //declare our buffer for footer
+            //set up our footer
+            WriteConsoleOutputCharacterA(scrbuff,ftitle.c_str(),ftitle.size(),fc,&cbuff2); //write footer text
+            FillConsoleOutputAttribute(scrbuff,fg,scrsizeW,fc,&cbuff2); //set up footer backgroudn
+
+
+    }
         
 
-        void init(){
+    void init(){ //inititialize the player
             string name,desc;
             item* none = new item("none","none");
-            cout << "\033[93m" << "\t\t[Deathly Hollow]\n";
-            cout << "\n Whats your name? "; std::getline(std::cin,name); //get username
-            cout << "\n Alittle background? ";std::getline(std::cin,desc);
+            print("\033[93m\n\t\t[Deathly Hollow]\n");
+            print("\n Whats your name? "); name = in(); //get player name with input handler
+            print("\n Alittle background? ");
+            
+            desc = in(); //get player description using our input handler
 
             main = new Player(name,desc,100); //initialize player
-            main->current = none;
+            main->current = none; //set player item to none, we cant have the player item uninitialized
+        
+    }
+
+        void print(const std::string& msg){ //new Console output handler since we are declaring a new scr buffer
+            DWORD Charbuff; //declare our character buffer
+            WriteConsoleA( // write the msg to screen buffer
+                scrbuff,
+                msg.c_str(),
+                msg.size(),
+                &Charbuff,
+                NULL
+            );
         }
 
-        void printHelp(){ //for user convenience
-            cout << "\n" << "Actions: \n";
-            cout << "\n" << "test - test action\n";
-            cout << "leave - exit the game\n";
-            cout << "move <location> - move to the desired location\n";
-            cout << "display - show the map\n";
-            cout << "where - show current coordinates\n";
-            cout << "look - show items in the room\n";
-            cout << "take - take an item in room\n";
-            cout << "use <item> - equip an item\n";
+        void printHelp(){ //for user convenience and serves as a guide
+            print("Actions: \n");
+            print("\ntest - test action\n");
+            print("leave - exit the game\n");
+            print("move <location> - move to the desired location\n");
+            print("display - show the map\n");
+            print("where - show current coordinates\n");
+            print("look - show items in the room\n");
+            print("take - take an item in room\n");
+            print("use <item> - equip an item\n");
         }
 
         void InitRooms(){ //initialize room before game begins
@@ -80,27 +136,53 @@ class Game{
 
         }
 
+        string in(){ //input handler for control, will be useful later.
+            string data = "";
+            char ch;
+
+            while(true){
+                ch = _getch();
+
+                if(ch == '\r'){
+                    print("\n");
+                    break;
+                }else if(ch == '\b'){
+                    if(!data.empty()){
+                        data.pop_back();
+                        print("\b \b");
+                    }
+                }else if(isprint(ch)){
+                    data += ch;
+                    string s(1,ch);
+                    print(s);
+                }
+
+            }
+
+            return data;
+        }
+
         void displayMap(std::pair<int,int>& coords,const int& Xaxis = 0,const int& Yaxis = MapSize::Y){ //for now we only have players coords as the
             bool isDone = false;
             std::pair<int,int> MapSize = world->getMapSize(); //get Map Size
 
-            cout << "--------------------------------------------\n";
+            print("--------------------------------------------\n");
             for(int posY = main->coords.second - 2;posY < Yaxis; posY++){
                 for(int posX = main->coords.first - 2;posX < Xaxis;posX++){
 
-                 //   std::cout << "PosX: " << posX << " PosY: " << posY << " "; //debug the map display for future bugs and shi
+                 //   std::print << "PosX: " << posX << " PosY: " << posY << " "; //debug the map display for future bugs and shi
 
                     if(world->tiles[posX][posY] != nullptr && (posX != coords.first || posY != coords.second)){
-                        cout << " "; // if populated we display as space.
+                        print(" "); // if populated we display as space.
                     }else if(posX == coords.first && posY == coords.second){
-                        cout << "O"; //display player position
+                        print("O"); //display player position
                     }else{
-                        cout << "#"; //display null elements as #  to simulate walls or borders
+                        print("#"); //display null elements as #  to simulate walls or borders
                     }
                 }
-                cout << "\n"; //new line after a row is done
+                print("\n"); //new line after a row is done
             }
-            std::cout << std::endl;
+            print("\n");
         }
 
         void traverse(const string& location){
@@ -114,7 +196,7 @@ class Game{
             }else if(current->West != nullptr && location == current->West->name){
                 current = current->West;
             }else{
-                cout << "\033[91m" << location << " does not exist!\n";
+                print("\033[91m" + location + " does not exist!\n");
                 return;
             }
 
@@ -122,25 +204,25 @@ class Game{
 
         void displayTiles(){ //display adjacent tiles to player
 
-            cout << "Nearby Tiles:\n";
+            print("Nearby Tiles:\n");
 
             if(current->North != nullptr){
-                cout << current->North->name << " | " << current->North->desc << "\n";
+                print(current->North->name + " | " + current->North->desc + "\n");
             }
 
             if(current->South != nullptr){
-                cout << current->South->name << " | " << current->South->desc << "\n";
+                print(current->South->name + " | " + current->South->desc + "\n");
             }
 
             if(current->East != nullptr){
-                cout << current->East->name << " | " << current->East->desc << "\n";
+                print( current->East->name + " | " + current->East->desc + "\n");
             }
 
             if(current->West != nullptr){
-                cout << current->West->name << " | " << current->West->desc << "\n";
+                print( current->West->name + " | " + current->West->desc + "\n");
             }
 
-            cout << "\n";
+            print("\n");
         }
 
         string remchar(string& origin,const char& target){
@@ -153,29 +235,41 @@ class Game{
             }
         }
 
+        void clearscreen(){ //clear screen
+            print("\033[2J\033[H");
+        }
+
 
 
     public:
 
 
-        void Main(){
+        void Main(HANDLE buff,const short& X,const short& Y){
+            scrbuff = buff;
+            //pass our screen buffer size from main
+            scrsizeH = Y;
+            scrsizeW = X;
+
+            DrawUI(); 
             init(); //initiate start of game
             InitRooms(); //initiate rooms
             string action; //Player action 
 
 
             while(isRUnning){ //main game loop
+                DrawUI(); //start rendering our UI.
+                clearscreen(); //clear screen so its clean
                 displayTiles(); //display adjacent tiles so players knows where to travert next
                 main->coords = current->coords;
-                std::cout << "Item Equipped: " << main->current->name << "\n"; //display current item of player 
-                std::cout << "\033[93m" << main->getname() <<  "@" << current->name << ">: "; //prompt
-                std::getline(std::cin,action); //player action
+                print("Item Equipped: " + main->current->name + "\n"); //display current item of player 
+                print("\033[93m" + main->getname() +  "@" + current->name + ">: "); //prompt
+                action = in(); //player action
                 std::stringstream ss(action); //init tokenizer
                 string cmd;
                 ss >> cmd;
                 
                 if(cmd.compare("test")==0){
-                    std::cout << "Hello From mars, your code is working!\n";
+                    print("Hello From mars, your code is working!\n");
                 }else if(cmd.compare("help")==0){ //for user convenience
                     printHelp();
                 }else if(cmd.compare("leave")==0){
@@ -189,11 +283,11 @@ class Game{
 
                     traverse(location); //make players traverse
                 }else if(cmd.compare("where")==0){
-                    cout << main->coords.first << "," << main->coords.second << "\n"; //display curr pos to player
+                    print(std::to_string(main->coords.first) + "," + std::to_string(main->coords.second) + "\n"); //display curr pos to player
                 }else if(cmd.compare("inventory")==0){ //display inventory of player
-                    main->main.displayItems(); 
+                    main->main.displayItems(scrbuff); 
                 }else if(cmd.compare("look")==0){
-                    current->displayLoot();
+                    current->displayLoot(scrbuff);
                 }else if(cmd.compare("take")==0){
                     string thing;
                     ss >> thing;
@@ -201,16 +295,27 @@ class Game{
                 }else if(cmd.compare("use")==0){
                     string thing;
                     ss >> thing;
-                    cout << thing << "\n"; //debug
-                    main->current = main->main.useItem(thing); 
+                    print(thing + "\n"); //debug
+                    main->current = main->main.useItem(thing,scrbuff); 
                 }else if(cmd.compare("shout")==0){
                     string sentence;
                     std::getline(ss,sentence);
-                    std::cout << sentence << "\n";
-                }else{
-                    std::cerr << "\033[91mGame: " << cmd << " is not an Action\n";
+                    print(sentence + "\n");
+                } else if (cmd.compare("drop")==0){
+                    std::string item;
+                    ss >> item;
+                    bool found = false;
+
+                    for(auto& x:main->main.bag){
+                        if(x.name == item){
+                            main->main.delItem(x,scrbuff);
+                            break;
+                        }
+                    }
+                } else {
+                    print("\033[91mGame: " + cmd + " is not an Action\n");
                 }
-                cout << "\n";
+                print("\n");
             }
         }
 

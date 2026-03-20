@@ -16,6 +16,7 @@ if %ERRORLEVEL% EQU 0 (
 
     echo Committed to repo
     )
+    
 ) else (
     echo Git not found!
 )
